@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from database import connect
 
+
 def register_routes(app):
 
     @app.route('/users', methods=['POST'])
@@ -31,3 +32,31 @@ def register_routes(app):
         conn.close()
 
         return jsonify(users)
+
+    @app.route('/users/<int:user_id>', methods=['PUT'])
+    def update_user(user_id):
+        data = request.json
+
+        conn = connect()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "UPDATE users SET name=?, email=? WHERE id=?",
+            (data['name'], data['email'], user_id)
+        )
+        conn.commit()
+        conn.close()
+
+        return {"message": "Usuário atualizado"}
+
+    @app.route('/users/<int:user_id>', methods=['DELETE'])
+    def delete_user(user_id):
+        conn = connect()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
+
+        conn.commit()
+        conn.close()
+
+        return {"message": "Usuário deletado"}
