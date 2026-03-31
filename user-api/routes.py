@@ -10,12 +10,18 @@ def register_routes(app):
 
         conn = connect()
         cursor = conn.cursor()
+        
+# verifica se já existe email
+        cursor.execute("SELECT * FROM users WHERE email=?", (data['email'],))
+        user = cursor.fetchone()
 
+        if user:
+             conn.close()
+             return {"error": "Email já cadastrado"}, 400
         cursor.execute(
-            "INSERT INTO users (name, email) VALUES (?, ?)",
-            (data['name'], data['email'])
-        )
-
+    "INSERT INTO users (name, email) VALUES (?, ?)",
+    (data['name'], data['email'])
+)
         conn.commit()
         conn.close()
 
