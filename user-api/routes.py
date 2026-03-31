@@ -10,22 +10,28 @@ def register_routes(app):
 
         conn = connect()
         cursor = conn.cursor()
-        
+
 # verifica se já existe email
         cursor.execute("SELECT * FROM users WHERE email=?", (data['email'],))
         user = cursor.fetchone()
 
         if user:
-             conn.close()
-             return {"error": "Email já cadastrado"}, 400
+            conn.close()
+            return {"error": "Email já cadastrado"}, 400
         cursor.execute(
-    "INSERT INTO users (name, email) VALUES (?, ?)",
-    (data['name'], data['email'])
-)
+            "INSERT INTO users (name, email) VALUES (?, ?)",
+            (data['name'], data['email'])
+        )
         conn.commit()
         conn.close()
 
-        return {"message": "Usuário criado com sucesso"}
+        return {
+            "message": "Usuário criado",
+            "user": {
+                "name": data["name"],
+                "email": data["email"]
+            }
+        }, 201
 
     @app.route('/users', methods=['GET'])
     def get_users():
@@ -34,6 +40,14 @@ def register_routes(app):
 
         cursor.execute("SELECT * FROM users")
         users = cursor.fetchall()
+        formatted = []
+        for user in users:
+            formatted.append({
+                "id": user[0],
+                "name": user[1],
+                "email": user[2]
+            })
+            return jsonify(formatted)
 
         conn.close()
 
